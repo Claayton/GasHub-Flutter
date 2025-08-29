@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gasbub_flutter/models/product_entity.dart';
-import 'package:gasbub_flutter/models/order_entity.dart';
+import 'package:gasbub_flutter/models/entities/product_entity.dart';
+import 'package:gasbub_flutter/models/entities/order_entity.dart';
 
 void main() {
   // Mock products for testing
