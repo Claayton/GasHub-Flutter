@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
-import 'package:gasbub_flutter/models/entities/order_entity.dart';
-import 'package:gasbub_flutter/models/entities/product_entity.dart';
-import 'package:gasbub_flutter/services/repositories/order_repository.dart';
+import 'package:gasbub_flutter/models/order_entity.dart';
+import 'package:gasbub_flutter/models/product_entity.dart';
+import 'package:gasbub_flutter/repositories/order_repository.dart';
 
 OrderEntity buildFakeOrder() {
   return OrderEntity(

@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:gasbub_flutter/models/entities/product_entity.dart';
-import 'package:gasbub_flutter/models/entities/order_entity.dart';
+import 'package:gasbub_flutter/models/product_entity.dart';
+import 'package:gasbub_flutter/models/order_entity.dart';
 
 class OrderRepository {
   final FirebaseFirestore _firestore;
