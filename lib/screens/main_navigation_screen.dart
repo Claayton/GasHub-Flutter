@@ -9,14 +9,20 @@ class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
 
   @override
-  State<MainNavigationScreen> createState() => _MainNavigationScreenState();
+  State<MainNavigationScreen> createState() => MainNavigationScreenState();
 }
 
-class _MainNavigationScreenState extends State<MainNavigationScreen> {
-  int _currentIndex = 0; // Índice da tela atual
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>(); // ← ADICIONE ISSO
+class MainNavigationScreenState extends State<MainNavigationScreen> {
+  int _currentIndex = 0;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  // Lista de telas correspondentes a cada item do menu
+  // ✅ FUNÇÃO PÚBLICA para mudar de aba
+  void changeTab(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+  }
+
   final List<Widget> _screens = [
     const OrdersScreen(),
     const NewOrderScreen(),
@@ -24,7 +30,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     const DashboardScreen(),
   ];
 
-  // Títulos para cada tab
   final List<String> _screenTitles = [
     'Pedidos',
     'Novo Pedido',
@@ -35,9 +40,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _scaffoldKey, // ← ADICIONE ISSO
+      key: _scaffoldKey,
       drawer: const AppDrawer(),
-      appBar: AppBar( // ← ADICIONE ESTA AppBar
+      appBar: AppBar(
         title: Text(_screenTitles[_currentIndex]),
         backgroundColor: const Color(0xFF1e40af),
         leading: IconButton(
@@ -49,7 +54,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       ),
       body: _screens[_currentIndex],
       
-      // BOTTOM NAVIGATION BAR
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {
