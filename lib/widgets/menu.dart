@@ -44,7 +44,7 @@ class AppDrawer extends StatelessWidget {
                       Text(
                         userEmail,
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.9),
+                          color: Colors.white,
                           fontSize: 14,
                         ),
                         overflow: TextOverflow.ellipsis,
