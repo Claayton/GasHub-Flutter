@@ -31,6 +31,21 @@ class OrderRepository {
     }
   }
 
+  Future<List<OrderEntity>> getOrdersByDateRange(DateTime start, DateTime end) async {
+    try {
+      final snapshot = await _firestore
+          .collection('pedidos')
+          .where('orderDateTime', isGreaterThanOrEqualTo: Timestamp.fromDate(start))
+          .where('orderDateTime', isLessThanOrEqualTo: Timestamp.fromDate(end))
+          .orderBy('orderDateTime', descending: true)
+          .get();
+
+      return snapshot.docs.map((doc) => _fromMap(doc.data(), doc.id)).toList();
+    } catch (e) {
+      throw Exception('Erro ao buscar pedidos por data: $e');
+    }
+  }
+
   // Listener em tempo real para todos os pedidos
   Stream<List<OrderEntity>> watchOrders() {
     return _firestore
@@ -42,6 +57,18 @@ class OrderRepository {
             .toList());
   }
 
+    // Stream por intervalo de datas
+  Stream<List<OrderEntity>> watchOrdersByDateRange(DateTime start, DateTime end) {
+    return _firestore
+        .collection('pedidos')
+        .where('orderDateTime', isGreaterThanOrEqualTo: Timestamp.fromDate(start))
+        .where('orderDateTime', isLessThanOrEqualTo: Timestamp.fromDate(end))
+        .orderBy('orderDateTime', descending: true)
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) => _fromMap(doc.data(), doc.id))
+            .toList());
+  }
 
     // Atualizar pedido
   Future<void> updateOrder(String id, OrderEntity order) async {
