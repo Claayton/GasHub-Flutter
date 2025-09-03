@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gasbub_flutter/screens/login_screen.dart';
+import '../cubit/auth/auth_cubit.dart';
 
 class AppDrawer extends StatelessWidget {
-  const AppDrawer({super.key}); // ✅ SEM CONST!
+  const AppDrawer({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -9,24 +12,27 @@ class AppDrawer extends StatelessWidget {
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
-          const DrawerHeader(
-            decoration: BoxDecoration(
-              color: Colors.orange,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(Icons.local_gas_station, size: 40, color: Colors.white),
-                SizedBox(height: 10),
-                Text(
-                  'GasHub',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
+          SizedBox(
+            height: 110,
+            child: DrawerHeader(
+              decoration: const BoxDecoration(
+                color: Color(0xFF1e40af),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    'GasHub',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 4),
+                ],
+              ),
             ),
           ),
           ListTile(
@@ -55,11 +61,18 @@ class AppDrawer extends StatelessWidget {
           ),
           const Divider(),
           ListTile(
-            leading: const Icon(Icons.login),
-            title: const Text('Entrar / Cadastrar'),
+            leading: const Icon(Icons.logout, color: Colors.red),
+            title: const Text(
+              'Sair',
+              style: TextStyle(color: Colors.red),
+            ),
             onTap: () {
               Navigator.pop(context);
-              print('Navegar para autenticação - IMPLEMENTAR DEPOIS');
+              context.read<AuthCubit>().logout();
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (_) => const LoginScreen()),
+                (route) => false,
+              );
             },
           ),
         ],

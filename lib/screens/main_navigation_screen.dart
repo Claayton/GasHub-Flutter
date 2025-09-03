@@ -3,6 +3,7 @@ import 'orders_screen.dart';
 import 'new_order_screen.dart';
 import 'pending_screen.dart';
 import 'dashboard_screen.dart';
+import 'package:gasbub_flutter/widgets/app_drawer.dart';
 
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
@@ -26,6 +27,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       // Tela atual baseada no índice
+      drawer: AppDrawer(),
       body: _screens[_currentIndex],
       
       // BOTTOM NAVIGATION BAR
