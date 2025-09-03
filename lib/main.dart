@@ -1,8 +1,23 @@
 import 'package:flutter/material.dart';
-import 'screens/main_navigation_screen.dart'; // 👈 Certifique-se de importar
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'services/auth_service.dart';
+import 'cubit/auth/auth_cubit.dart';
+import 'cubit/auth/auth_state.dart';
+import 'config/firebase_config.dart';
+import 'screens/login_screen.dart';
+import 'screens/main_navigation_screen.dart';
+import 'screens/splash_screen.dart';
 
-void main() {
-  runApp(const GasHubApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await FirebaseConfig.initialize();
+
+  runApp(
+    BlocProvider(
+      create: (_) => AuthCubit(AuthService()),
+      child: const GasHubApp(),
+    ),
+  );
 }
 
 class GasHubApp extends StatelessWidget {
@@ -13,25 +28,55 @@ class GasHubApp extends StatelessWidget {
     return MaterialApp(
       title: 'GasHub - Gestão de Pedidos',
       theme: ThemeData(
-        // PALETA AZUL DEEPSEEK - NOVA IDENTIDADE
-        primaryColor: const Color(0xFF1e40af),     // Azul principal
-        primarySwatch: Colors.blue,
+        primaryColor: const Color(0xFF1e40af),
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF1e40af),      // Azul DeepSeek
-          primary: const Color(0xFF1e40af),        // Azul principal
-          secondary: const Color(0xFF3b82f6),      // Azul secundário
-          background: const Color(0xFFf8fafc),     // Fundo suave
+          seedColor: const Color(0xFF1e40af),
+          primary: const Color(0xFF1e40af),
+          secondary: const Color(0xFF3b82f6),
+          surface: const Color(0xFFf8fafc),
         ),
         scaffoldBackgroundColor: const Color(0xFFf8fafc),
         appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF1e40af),      // AppBar azul
-          foregroundColor: Colors.white,           // Texto branco
-          elevation: 2,
+          backgroundColor: Color(0xFF1e40af),
+          foregroundColor: Colors.white,
         ),
         useMaterial3: true,
       ),
-      home: MainNavigationScreen(), // ✅✅✅ SEM CONST AGORA!
-      debugShowCheckedModeBanner: false,
+      debugShowCheckedModeBanner: true,
+      home: BlocConsumer<AuthCubit, AuthState>(
+        listener: (context, state) {
+          if (state is AuthError) {
+            _showDialog(context, 'Erro', state.message);
+          }
+        },
+        builder: (context, state) {
+          if (state is AuthInitial || state is AuthLoading) {
+            return const SplashScreen();
+          } else if (state is AuthAuthenticated) {
+            return MainNavigationScreen();
+          } else if (state is AuthError) {
+            return const LoginScreen();
+          } else {
+            return const LoginScreen(); // AuthUnauthenticated
+          }
+        },
+      ),
+    );
+  }
+
+  static void _showDialog(BuildContext context, String title, String message) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: [
+          TextButton(
+            child: const Text("OK"),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ],
+      ),
     );
   }
 }
