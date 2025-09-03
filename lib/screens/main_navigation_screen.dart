@@ -14,6 +14,7 @@ class MainNavigationScreen extends StatefulWidget {
 
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _currentIndex = 0; // Índice da tela atual
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>(); // ← ADICIONE ISSO
 
   // Lista de telas correspondentes a cada item do menu
   final List<Widget> _screens = [
@@ -23,11 +24,29 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     const DashboardScreen(),
   ];
 
+  // Títulos para cada tab
+  final List<String> _screenTitles = [
+    'Pedidos',
+    'Novo Pedido',
+    'À Receber',
+    'Dashboard'
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Tela atual baseada no índice
-      drawer: AppDrawer(),
+      key: _scaffoldKey, // ← ADICIONE ISSO
+      drawer: const AppDrawer(),
+      appBar: AppBar( // ← ADICIONE ESTA AppBar
+        title: Text(_screenTitles[_currentIndex]),
+        backgroundColor: const Color(0xFF1e40af),
+        leading: IconButton(
+          icon: const Icon(Icons.menu),
+          onPressed: () {
+            _scaffoldKey.currentState?.openDrawer();
+          },
+        ),
+      ),
       body: _screens[_currentIndex],
       
       // BOTTOM NAVIGATION BAR
@@ -39,7 +58,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           });
         },
         type: BottomNavigationBarType.fixed,
-        selectedItemColor: const Color(0xFF1e40af), // Azul DeepSeek
+        selectedItemColor: const Color(0xFF1e40af),
         unselectedItemColor: Colors.grey[600],
         items: const [
           BottomNavigationBarItem(

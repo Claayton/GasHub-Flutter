@@ -6,9 +6,6 @@ class PendingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Pedidos a Receber'),
-      ),
       body: const Center(
         child: Text('Pedidos pendentes serão exibidos aqui'),
       ),

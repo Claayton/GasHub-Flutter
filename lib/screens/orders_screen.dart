@@ -6,9 +6,6 @@ class OrdersScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Todos os Pedidos'),
-      ),
       body: const Center(
         child: Text('Lista de todos os pedidos será exibida aqui'),
       ),
