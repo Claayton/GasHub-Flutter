@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gasbub_flutter/cubit/auth/auth_cubit.dart';
 import 'package:gasbub_flutter/cubit/auth/auth_state.dart';
 import 'package:gasbub_flutter/screens/main_navigation_screen.dart';
-import 'package:gasbub_flutter/screens/register_screen.dart';
+import 'package:gasbub_flutter/screens/auth/register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});

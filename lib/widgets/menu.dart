@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:gasbub_flutter/screens/login_screen.dart';
+import 'package:gasbub_flutter/screens/auth/login_screen.dart';
 import '../cubit/auth/auth_cubit.dart';
 
 class AppDrawer extends StatelessWidget {

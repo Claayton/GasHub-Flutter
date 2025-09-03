@@ -4,9 +4,9 @@ import 'services/auth_service.dart';
 import 'cubit/auth/auth_cubit.dart';
 import 'cubit/auth/auth_state.dart';
 import 'config/firebase_config.dart';
-import 'screens/login_screen.dart';
+import 'screens/auth/login_screen.dart';
 import 'screens/main_navigation_screen.dart';
-import 'screens/splash_screen.dart';
+import 'screens/auth/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
