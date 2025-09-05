@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gasbub_flutter/cubit/orders/orders_cubit.dart';
 import 'package:gasbub_flutter/models/order_entity.dart';
 import 'package:gasbub_flutter/models/product_entity.dart';
+import 'package:gasbub_flutter/screens/main_navigation_screen.dart';
 
 class NewOrderScreen extends StatefulWidget {
   const NewOrderScreen({super.key});
@@ -13,14 +14,9 @@ class NewOrderScreen extends StatefulWidget {
 
 class _NewOrderScreenState extends State<NewOrderScreen> {
   final _formKey = GlobalKey<FormState>();
-  
-  // Controladores para os campos
   final _customerNameController = TextEditingController();
   final _customerAddressController = TextEditingController();
   PaymentMethods _selectedPaymentMethod = PaymentMethods.dinheiro;
-  
-  // Lista de produtos (vamos começar simples)
-  final List<ProductEntity> _selectedProducts = [];
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +35,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
               TextFormField(
                 controller: _customerNameController,
                 decoration: const InputDecoration(
-                  labelText: 'Nome do Cliente',
+                  labelText: 'Nome do Cliente *',
                   border: OutlineInputBorder(),
                 ),
                 validator: (value) {
@@ -56,7 +52,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
               TextFormField(
                 controller: _customerAddressController,
                 decoration: const InputDecoration(
-                  labelText: 'Endereço',
+                  labelText: 'Endereço *',
                   border: OutlineInputBorder(),
                 ),
                 validator: (value) {
@@ -73,7 +69,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
               DropdownButtonFormField<PaymentMethods>(
                 value: _selectedPaymentMethod,
                 decoration: const InputDecoration(
-                  labelText: 'Método de Pagamento',
+                  labelText: 'Método de Pagamento *',
                   border: OutlineInputBorder(),
                 ),
                 items: PaymentMethods.values.map((method) {
@@ -112,42 +108,45 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
 
   void _createOrder() async {
     if (_formKey.currentState!.validate()) {
-      // Criar um pedido simples para teste
-      final newOrder = OrderEntity(
-        id: '', // Firebase vai gerar
-        customerName: _customerNameController.text,
-        customerAddress: _customerAddressController.text,
-        products: [
-          ProductEntity(
-            id: '1', 
-            name: 'Gás P13', 
-            price: 85.0, 
-            description: 'Gás P13', 
-            stockQuantity: 10
-          )
-        ], // Produto fixo para teste
-        orderDateTime: DateTime.now(),
-        paymentMethod: _selectedPaymentMethod,
-        dueDate: _selectedPaymentMethod == PaymentMethods.fiado 
-            ? DateTime.now().add(const Duration(days: 30))
-            : DateTime.now(),
-        status: OrderStatus.pending,
-        pendingValue: _selectedPaymentMethod == PaymentMethods.fiado ? 85.0 : 0,
-        totalValue: 85.0,
-        userId: 'user-id-test', // Temporário - depois pegamos do usuário logado
-      );
-
       try {
+        final newOrder = OrderEntity(
+          id: '', // Firebase vai gerar
+          customerName: _customerNameController.text,
+          customerAddress: _customerAddressController.text,
+          products: [
+            ProductEntity(
+              id: '1', 
+              name: 'Gás P13', 
+              price: 85.0, 
+              description: 'Gás P13', 
+              stockQuantity: 10
+            )
+          ],
+          orderDateTime: DateTime.now(),
+          paymentMethod: _selectedPaymentMethod,
+          dueDate: _selectedPaymentMethod == PaymentMethods.fiado 
+              ? DateTime.now().add(const Duration(days: 30))
+              : DateTime.now(),
+          status: OrderStatus.pending,
+          pendingValue: _selectedPaymentMethod == PaymentMethods.fiado ? 85.0 : 0,
+          totalValue: 85.0,
+          userId: 'user-id-temporario', // ← TEMPORÁRIO
+        );
+
         // Usar o OrdersCubit para criar o pedido
         await context.read<OrdersCubit>().createOrder(newOrder);
         
         // Voltar para tela anterior
-        Navigator.pop(context);
+        final mainState = context.findAncestorStateOfType<MainNavigationScreenState>();
+            mainState?.changeTab(0); // 1 = índice do Novo Pedido
         
       } catch (e) {
         // Mostrar erro
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao criar pedido: $e')),
+          SnackBar(
+            content: Text('Erro ao criar pedido: ${e.toString()}'),
+            duration: const Duration(seconds: 5),
+          ),
         );
       }
     }
