@@ -6,7 +6,6 @@ import 'package:gasbub_flutter/screens/main_navigation_screen.dart';
 import 'package:gasbub_flutter/widgets/order_card.dart';
 import 'package:gasbub_flutter/repositories/order_repository.dart';
 import 'package:gasbub_flutter/models/order_entity.dart';
-import 'package:gasbub_flutter/screens/new_order_screen.dart';
 
 class OrdersScreen extends StatelessWidget {
   const OrdersScreen({super.key});
