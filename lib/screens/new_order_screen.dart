@@ -180,7 +180,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                       firstDate: DateTime.now(),
                       lastDate: DateTime.now().add(const Duration(days: 365)),
                     );
-                    if (selectedDate != null) {
+                    if (selectedDate != null && mounted) {
                       setState(() => _dueDate = selectedDate);
                     }
                   },
@@ -264,7 +264,10 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
+          TextButton(
+            onPressed: () => Navigator.pop(context), 
+            child: const Text('Cancelar')
+          ),
           ElevatedButton(
             onPressed: () {
               final newQuantity = int.tryParse(quantityController.text) ?? quantity;
@@ -272,15 +275,17 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                       priceController.text.replaceAll(RegExp(r'[^0-9]'), ''))! /
                   100;
 
-              setState(() {
-                _totalValue -= price * quantity;
-                item['quantity'] = newQuantity;
-                item['price'] = newPrice;
-                _totalValue += newPrice * newQuantity;
-                if (_selectedPaymentMethod == PaymentMethods.fiado) {
-                  _pendingValue = _totalValue;
-                }
-              });
+              if (mounted) {
+                setState(() {
+                  _totalValue -= price * quantity;
+                  item['quantity'] = newQuantity;
+                  item['price'] = newPrice;
+                  _totalValue += newPrice * newQuantity;
+                  if (_selectedPaymentMethod == PaymentMethods.fiado) {
+                    _pendingValue = _totalValue;
+                  }
+                });
+              }
 
               Navigator.pop(context);
             },
@@ -292,18 +297,22 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
   }
 
   void _removeProduct(Map<String, dynamic> item) {
-    setState(() {
-      final quantity = item['quantity'] as int;
-      final price = item['price'] as double;
-      _totalValue -= price * quantity;
-      _selectedProducts.remove(item);
-      if (_selectedPaymentMethod == PaymentMethods.fiado) {
-        _pendingValue = _totalValue;
-      }
-    });
+    if (mounted) {
+      setState(() {
+        final quantity = item['quantity'] as int;
+        final price = item['price'] as double;
+        _totalValue -= price * quantity;
+        _selectedProducts.remove(item);
+        if (_selectedPaymentMethod == PaymentMethods.fiado) {
+          _pendingValue = _totalValue;
+        }
+      });
+    }
   }
 
-  void _createOrder() async {
+  Future<void> _createOrder() async {
+    if (!mounted) return;
+    
     if (_formKey.currentState!.validate() && _selectedProducts.isNotEmpty) {
       try {
         final products = _selectedProducts.expand((item) {
@@ -341,15 +350,22 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
 
         await context.read<OrdersCubit>().createOrder(newOrder);
 
+        // Verificar se ainda está montado antes de navegar
+        if (!mounted) return;
+        
         final mainState =
             context.findAncestorStateOfType<MainNavigationScreenState>();
-        mainState?.changeTab(0);
+        if (mainState != null && mounted) {
+          mainState.changeTab(0);
+        }
       } catch (e) {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Erro ao criar pedido: ${e.toString()}')),
         );
       }
     } else if (_selectedProducts.isEmpty) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Adicione pelo menos um produto ao pedido')),
       );

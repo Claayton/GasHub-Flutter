@@ -4,7 +4,7 @@ import 'package:gasbub_flutter/cubit/orders/orders_cubit.dart';
 import 'package:gasbub_flutter/cubit/orders/orders_state.dart';
 import 'package:gasbub_flutter/models/order_entity.dart';
 import 'package:gasbub_flutter/utils/formatters.dart';
-import 'package:gasbub_flutter/widgets/order_card.dart'; // 👈 Importe o OrderCard
+import 'package:gasbub_flutter/widgets/order_card.dart';
 
 class PendingScreen extends StatefulWidget {
   const PendingScreen({super.key});
@@ -20,8 +20,14 @@ class _PendingScreenState extends State<PendingScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<OrdersCubit>().loadPendingOrders();
+      _loadOrders();
     });
+  }
+
+  void _loadOrders() {
+    if (mounted) {
+      context.read<OrdersCubit>().loadPendingOrders();
+    }
   }
 
   void _handleMarkAsPaid(OrderEntity pedido) {
@@ -29,8 +35,11 @@ class _PendingScreenState extends State<PendingScreen> {
       _processandoPagamentoId = pedido.id;
     });
 
+    // Captura o context atual antes do async gap
+    final currentContext = context;
+    
     showDialog(
-      context: context,
+      context: currentContext,
       builder: (context) => AlertDialog(
         title: const Text('Marcar como Pago'),
         content: Text(
@@ -39,42 +48,59 @@ class _PendingScreenState extends State<PendingScreen> {
         actions: [
           TextButton(
             onPressed: () {
-              setState(() {
-                _processandoPagamentoId = null;
-              });
+              if (mounted) {
+                setState(() {
+                  _processandoPagamentoId = null;
+                });
+              }
               Navigator.pop(context);
             },
             child: const Text('Cancelar'),
           ),
           TextButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              try {
-                await context.read<OrdersCubit>().marcarComoPago(pedido.id);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Pedido de ${pedido.customerName} marcado como pago!'),
-                    backgroundColor: Colors.green,
-                  ),
-                );
-              } catch (error) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Erro: $error'),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-              } finally {
-                setState(() {
-                  _processandoPagamentoId = null;
-                });
-              }
-            },
+            onPressed: () => _confirmMarkAsPaid(pedido, currentContext),
             child: const Text('Marcar como Pago'),
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _confirmMarkAsPaid(OrderEntity pedido, BuildContext dialogContext) async {
+    Navigator.pop(dialogContext);
+    
+    try {
+      await context.read<OrdersCubit>().marcarComoPago(pedido.id);
+      
+      // Usar WidgetsBinding para garantir que executa no frame certo
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Pedido de ${pedido.customerName} marcado como pago!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      });
+    } catch (error) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Erro: $error'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _processandoPagamentoId = null;
+        });
+      }
+    }
   }
 
   @override
@@ -151,7 +177,6 @@ class _PendingScreenState extends State<PendingScreen> {
   Widget _buildEmptyState() {
     return Column(
       children: [
-        // Header Fixo
         Container(
           padding: const EdgeInsets.all(12),
           decoration: const BoxDecoration(
@@ -200,7 +225,6 @@ class _PendingScreenState extends State<PendingScreen> {
 
     return Column(
       children: [
-        // Header Fixo
         Container(
           padding: const EdgeInsets.all(12),
           decoration: const BoxDecoration(
@@ -230,7 +254,6 @@ class _PendingScreenState extends State<PendingScreen> {
           ),
         ),
 
-        // Lista de pedidos usando OrderCard
         Expanded(
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -244,8 +267,7 @@ class _PendingScreenState extends State<PendingScreen> {
                   order: pedido,
                   showActions: true,
                   onPay: isProcessing ? null : () => _handleMarkAsPaid(pedido),
-                  onEdit: null, // Ou implemente a edição se precisar
-                  // Remova o onTap se não for necessário nesta tela
+                  onEdit: null,
                 );
               },
             ),
