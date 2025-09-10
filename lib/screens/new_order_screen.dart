@@ -371,7 +371,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
           dueDate: _selectedPaymentMethod == PaymentMethods.fiado
               ? _dueDate ?? DateTime.now().add(const Duration(days: 30))
               : DateTime.now(),
-          status: OrderStatus.pending,
+          status: _selectedPaymentMethod == PaymentMethods.fiado ? OrderStatus.pending : OrderStatus.confirmed,
           pendingValue: _selectedPaymentMethod == PaymentMethods.fiado ? _pendingValue : 0,
           totalValue: _totalValue,
           userId: 'user-id-temporario',
