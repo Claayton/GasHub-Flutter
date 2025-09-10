@@ -17,7 +17,8 @@ class OrderCard extends StatelessWidget {
     if (order.status == OrderStatus.confirmed) {
       statusColor = const Color(0xFF28A745); // Verde (pago)
       } else {
-      statusColor = const Color(0xFFF0AD4E); // Laranja (pendente)
+      statusColor = const Color(0xFFFF6B35
+); // Laranja (pendente)
     }
 
     return Container(
