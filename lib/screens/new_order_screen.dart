@@ -131,7 +131,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                       ],
                     ),
                   );
-                }).toList(),
+                }),
                 const SizedBox(height: 16),
                 Text(
                   'Total: R\$${_totalValue.toStringAsFixed(2)}',
@@ -142,7 +142,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
               const SizedBox(height: 16),
 
               DropdownButtonFormField<PaymentMethods>(
-                value: _selectedPaymentMethod,
+                initialValue: _selectedPaymentMethod,
                 decoration: const InputDecoration(
                   labelText: 'Método de Pagamento *',
                   border: OutlineInputBorder(),
@@ -293,7 +293,6 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
 
   void _removeProduct(Map<String, dynamic> item) {
     setState(() {
-      final product = item['product'] as ProductEntity;
       final quantity = item['quantity'] as int;
       final price = item['price'] as double;
       _totalValue -= price * quantity;
