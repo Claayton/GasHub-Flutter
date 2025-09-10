@@ -25,19 +25,19 @@ class OrderCard extends StatelessWidget {
 
     // Cores de status
     Color statusColor = order.status == OrderStatus.confirmed
-        ? const Color(0xFF10B981) // Verde mais moderno
-        : const Color(0xFFF59E0B); // Laranja mais suave
+        ? const Color(0xFF10B981) // Verde para "Recebido"
+        : const Color(0xFFF59E0B); // Laranja para "À Receber"
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -45,12 +45,12 @@ class OrderCard extends StatelessWidget {
         children: [
           // Header com status e valor
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
-              color: statusColor.withOpacity(0.1),
+              color: statusColor.withOpacity(0.08),
               borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(16),
-                topRight: Radius.circular(16),
+                topLeft: Radius.circular(12),
+                topRight: Radius.circular(12),
               ),
             ),
             child: Row(
@@ -58,16 +58,16 @@ class OrderCard extends StatelessWidget {
               children: [
                 // Status
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
                     color: statusColor,
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(16),
                   ),
                   child: Text(
-                    _getStatusText(order.status),
+                    order.status == OrderStatus.confirmed ? 'RECEBIDO' : 'À RECEBER',
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 12,
+                      fontSize: 11,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -76,7 +76,7 @@ class OrderCard extends StatelessWidget {
                 Text(
                   'R\$${formatarValor(valorExibir)}',
                   style: TextStyle(
-                    fontSize: 18,
+                    fontSize: 16,
                     fontWeight: FontWeight.w700,
                     color: statusColor,
                   ),
@@ -89,59 +89,57 @@ class OrderCard extends StatelessWidget {
           InkWell(
             onTap: onTap,
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(14),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Nome do cliente
+                  // Nome do cliente (primeira letra maiúscula)
                   Text(
-                    order.customerName,
+                    _capitalizeFirstLetter(order.customerName),
                     style: const TextStyle(
-                      fontSize: 16,
+                      fontSize: 15,
                       fontWeight: FontWeight.w600,
                       color: Colors.black87,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6),
 
                   // Endereço
                   Row(
                     children: [
-                      const Icon(Icons.location_on, size: 14, color: Colors.grey),
+                      const Icon(Icons.location_on, size: 13, color: Colors.grey),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
                           order.customerAddress,
                           style: const TextStyle(
-                            fontSize: 13,
+                            fontSize: 12,
                             color: Colors.grey,
                           ),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 10),
 
-                  // Produtos
+                  // Produtos (mais compacto)
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: order.products.map((product) => Padding(
-                      padding: const EdgeInsets.only(bottom: 4),
+                      padding: const EdgeInsets.only(bottom: 2),
                       child: Text(
                         '• ${product.name}',
                         style: const TextStyle(
-                          fontSize: 14,
+                          fontSize: 13,
                           color: Colors.black87,
                         ),
                       ),
                     )).toList(),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 10),
 
-                  // Informações adicionais
-                  Wrap(
-                    spacing: 12,
-                    runSpacing: 8,
+                  // Informações em linha (tags)
+                  Row(
                     children: [
                       // Método de pagamento
                       _InfoChip(
@@ -149,21 +147,24 @@ class OrderCard extends StatelessWidget {
                         text: _getPaymentMethodText(order.paymentMethod),
                         color: Colors.blue,
                       ),
-
-                      // Data do pedido
+                      const SizedBox(width: 6),
+                      
+                      // Data do pedido (formato BR)
                       _InfoChip(
                         icon: Icons.calendar_today,
-                        text: formatarData(order.orderDateTime),
+                        text: _formatDateBr(order.orderDateTime),
                         color: Colors.grey,
                       ),
-
+                      
                       // Vencimento (se for fiado)
-                      if (isFiado)
+                      if (isFiado) ...[
+                        const SizedBox(width: 6),
                         _InfoChip(
                           icon: Icons.event,
-                          text: 'Vence: ${formatarData(order.dueDate)}',
+                          text: 'Vence: ${_formatDateBr(order.dueDate)}',
                           color: const Color(0xFFEF4444),
                         ),
+                      ],
                     ],
                   ),
                 ],
@@ -175,37 +176,37 @@ class OrderCard extends StatelessWidget {
           if (showActions) ...[
             const Divider(height: 1),
             Padding(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(10),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   // Botão Editar
-                  OutlinedButton.icon(
+                  OutlinedButton(
                     onPressed: onEdit,
-                    icon: const Icon(Icons.edit, size: 16),
-                    label: const Text('Editar'),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.blue,
                       side: const BorderSide(color: Colors.blue),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(6),
                       ),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     ),
+                    child: const Text('Editar', style: TextStyle(fontSize: 12)),
                   ),
                   const SizedBox(width: 8),
                   
                   // Botão Pagar
-                  ElevatedButton.icon(
+                  ElevatedButton(
                     onPressed: onPay,
-                    icon: const Icon(Icons.payment, size: 16),
-                    label: const Text('Marcar Pago'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF10B981),
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(6),
                       ),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     ),
+                    child: const Text('Pagar', style: TextStyle(fontSize: 12)),
                   ),
                 ],
               ),
@@ -216,13 +217,13 @@ class OrderCard extends StatelessWidget {
     );
   }
 
-  String _getStatusText(OrderStatus status) {
-    switch (status) {
-      case OrderStatus.pending:
-        return 'PENDENTE';
-      case OrderStatus.confirmed:
-        return 'CONFIRMADO';
-    }
+  String _capitalizeFirstLetter(String text) {
+    if (text.isEmpty) return text;
+    return text[0].toUpperCase() + text.substring(1).toLowerCase();
+  }
+
+  String _formatDateBr(DateTime date) {
+    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}';
   }
 
   String _getPaymentMethodText(PaymentMethods method) {
@@ -256,21 +257,21 @@ class _InfoChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withOpacity(0.2)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 12, color: color),
-          const SizedBox(width: 4),
+          Icon(icon, size: 10, color: color),
+          const SizedBox(width: 3),
           Text(
             text,
             style: TextStyle(
-              fontSize: 11,
+              fontSize: 10,
               color: color,
               fontWeight: FontWeight.w500,
             ),
