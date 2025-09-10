@@ -4,6 +4,8 @@ import 'package:gasbub_flutter/cubit/orders/orders_cubit.dart';
 import 'package:gasbub_flutter/models/order_entity.dart';
 import 'package:gasbub_flutter/models/product_entity.dart';
 import 'package:gasbub_flutter/screens/main_navigation_screen.dart';
+import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 
 class NewOrderScreen extends StatefulWidget {
   const NewOrderScreen({super.key});
@@ -37,8 +39,6 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
 
   // Estado do formulário
   PaymentMethods _selectedPaymentMethod = PaymentMethods.dinheiro;
-  ProductEntity? _selectedProduct;
-  int _quantity = 1;
   final List<Map<String, dynamic>> _selectedProducts = []; // {product, quantity, price}
   double _totalValue = 0.0;
 
@@ -59,41 +59,29 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
           key: _formKey,
           child: ListView(
             children: [
-              // Campo Nome do Cliente
               TextFormField(
                 controller: _customerNameController,
                 decoration: const InputDecoration(
                   labelText: 'Nome do Cliente *',
                   border: OutlineInputBorder(),
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Digite o nome do cliente';
-                  }
-                  return null;
-                },
+                validator: (value) =>
+                    value == null || value.isEmpty ? 'Digite o nome do cliente' : null,
               ),
               const SizedBox(height: 16),
 
-              // Campo Endereço
               TextFormField(
                 controller: _customerAddressController,
                 decoration: const InputDecoration(
                   labelText: 'Endereço *',
                   border: OutlineInputBorder(),
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Digite o endereço';
-                  }
-                  return null;
-                },
+                validator: (value) =>
+                    value == null || value.isEmpty ? 'Digite o endereço' : null,
               ),
               const SizedBox(height: 16),
 
-              // Seleção de Produto
               DropdownButtonFormField<ProductEntity>(
-                value: _selectedProduct,
                 decoration: const InputDecoration(
                   labelText: 'Selecionar Produto *',
                   border: OutlineInputBorder(),
@@ -105,60 +93,34 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
                   );
                 }).toList(),
                 onChanged: (product) {
-                  setState(() {
-                    _selectedProduct = product;
-                  });
-                },
-                validator: (value) {
-                  if (value == null && _selectedProducts.isEmpty) {
-                    return 'Selecione um produto';
+                  if (product != null) {
+                    setState(() {
+                      _selectedProducts.add({
+                        'product': product,
+                        'quantity': 1,
+                        'price': product.price,
+                      });
+                      _totalValue += product.price;
+                      if (_selectedPaymentMethod == PaymentMethods.fiado) {
+                        _pendingValue = _totalValue;
+                      }
+                    });
                   }
-                  return null;
                 },
               ),
 
-              if (_selectedProduct != null) ...[
-                const SizedBox(height: 16),
-                // Quantidade do produto
-                Row(
-                  children: [
-                    const Text('Quantidade:'),
-                    const SizedBox(width: 16),
-                    IconButton(
-                      icon: const Icon(Icons.remove),
-                      onPressed: () {
-                        if (_quantity > 1) {
-                          setState(() => _quantity--);
-                        }
-                      },
-                    ),
-                    Text(_quantity.toString()),
-                    IconButton(
-                      icon: const Icon(Icons.add),
-                      onPressed: () {
-                        setState(() => _quantity++);
-                      },
-                    ),
-                    const Spacer(),
-                    ElevatedButton(
-                      onPressed: _addProduct,
-                      child: const Text('Adicionar'),
-                    ),
-                  ],
-                ),
-              ],
-
-              // Lista de produtos selecionados
               if (_selectedProducts.isNotEmpty) ...[
                 const SizedBox(height: 16),
-                const Text('Produtos no pedido:', style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text('Produtos no pedido:',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
                 ..._selectedProducts.map((item) {
                   final product = item['product'] as ProductEntity;
                   final quantity = item['quantity'] as int;
                   final price = item['price'] as double;
                   return ListTile(
                     title: Text('${product.name} x$quantity'),
-                    subtitle: Text('R\$${(price * quantity).toStringAsFixed(2)} (R\$${price.toStringAsFixed(2)} un.)'),
+                    subtitle: Text(
+                        'R\$${(price * quantity).toStringAsFixed(2)} (R\$${price.toStringAsFixed(2)} un.)'),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -183,7 +145,6 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
 
               const SizedBox(height: 16),
 
-              // Seleção de Método de Pagamento
               DropdownButtonFormField<PaymentMethods>(
                 value: _selectedPaymentMethod,
                 decoration: const InputDecoration(
@@ -241,7 +202,6 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
 
               const SizedBox(height: 24),
 
-              // Botão para criar pedido
               ElevatedButton(
                 onPressed: _createOrder,
                 style: ElevatedButton.styleFrom(
@@ -260,31 +220,32 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
     );
   }
 
-  void _addProduct() {
-    if (_selectedProduct != null && _quantity > 0) {
-      setState(() {
-        _selectedProducts.add({
-          'product': _selectedProduct!,
-          'quantity': _quantity,
-          'price': _selectedProduct!.price,
-        });
-        _totalValue += _selectedProduct!.price * _quantity;
-        _selectedProduct = null;
-        _quantity = 1;
-        if (_selectedPaymentMethod == PaymentMethods.fiado) {
-          _pendingValue = _totalValue;
-        }
-      });
-    }
-  }
-
   void _editProduct(Map<String, dynamic> item) {
     final product = item['product'] as ProductEntity;
     final quantity = item['quantity'] as int;
     final price = item['price'] as double;
 
     final quantityController = TextEditingController(text: quantity.toString());
-    final priceController = TextEditingController(text: price.toStringAsFixed(2));
+    final priceController = TextEditingController(
+      text: NumberFormat.currency(locale: 'pt_BR', symbol: '', decimalDigits: 2)
+          .format(price),
+    );
+
+    priceController.addListener(() {
+      final text = priceController.text.replaceAll(RegExp(r'[^0-9]'), '');
+      if (text.isNotEmpty) {
+        final value = double.parse(text) / 100;
+        priceController.value = TextEditingValue(
+          text: NumberFormat.currency(locale: 'pt_BR', symbol: '', decimalDigits: 2)
+              .format(value),
+          selection: TextSelection.collapsed(
+            offset: NumberFormat.currency(locale: 'pt_BR', symbol: '', decimalDigits: 2)
+                .format(value)
+                .length,
+          ),
+        );
+      }
+    });
 
     showDialog(
       context: context,
@@ -302,6 +263,7 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
               controller: priceController,
               decoration: const InputDecoration(labelText: 'Preço Unitário'),
               keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             ),
           ],
         ),
@@ -310,7 +272,9 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
           ElevatedButton(
             onPressed: () {
               final newQuantity = int.tryParse(quantityController.text) ?? quantity;
-              final newPrice = double.tryParse(priceController.text) ?? price;
+              final newPrice = double.tryParse(
+                      priceController.text.replaceAll(RegExp(r'[^0-9]'), ''))! /
+                  100;
 
               setState(() {
                 _totalValue -= price * quantity;
@@ -371,15 +335,19 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
           dueDate: _selectedPaymentMethod == PaymentMethods.fiado
               ? _dueDate ?? DateTime.now().add(const Duration(days: 30))
               : DateTime.now(),
-          status: _selectedPaymentMethod == PaymentMethods.fiado ? OrderStatus.pending : OrderStatus.confirmed,
-          pendingValue: _selectedPaymentMethod == PaymentMethods.fiado ? _pendingValue : 0,
+          status: _selectedPaymentMethod == PaymentMethods.fiado
+              ? OrderStatus.pending
+              : OrderStatus.confirmed,
+          pendingValue:
+              _selectedPaymentMethod == PaymentMethods.fiado ? _pendingValue : 0,
           totalValue: _totalValue,
           userId: 'user-id-temporario',
         );
 
         await context.read<OrdersCubit>().createOrder(newOrder);
 
-        final mainState = context.findAncestorStateOfType<MainNavigationScreenState>();
+        final mainState =
+            context.findAncestorStateOfType<MainNavigationScreenState>();
         mainState?.changeTab(0);
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
