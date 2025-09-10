@@ -49,10 +49,6 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Novo Pedido'),
-        backgroundColor: const Color(0xFF1e40af),
-      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(
