@@ -13,6 +13,11 @@ class OrdersLoaded extends OrdersState {
 
 class OrdersEmpty extends OrdersState {}
 
+class OrdersSuccess extends OrdersState {
+  final String message;
+  OrdersSuccess(this.message);
+}
+
 class OrdersError extends OrdersState {
   final String message;
   OrdersError(this.message);
