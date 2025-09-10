@@ -1,3 +1,4 @@
+import 'dart:async'; // 👈 Adicione esta importação
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gasbub_flutter/models/product_entity.dart';
 import 'package:gasbub_flutter/models/order_entity.dart';
@@ -5,20 +6,19 @@ import 'package:gasbub_flutter/models/order_entity.dart';
 class OrderRepository {
   final FirebaseFirestore _firestore;
 
-
   OrderRepository({FirebaseFirestore? firestore})
       : _firestore = firestore ?? FirebaseFirestore.instance;
 
-    Future<String> createOrder(OrderEntity order) async {
-      try {
-        final docRef = await _firestore.collection('pedidos').add(_toMap(order));
-        return docRef.id;
-      } catch (e) {
-        throw Exception('Error creating order: $e');
-      }
+  Future<String> createOrder(OrderEntity order) async {
+    try {
+      final docRef = await _firestore.collection('pedidos').add(_toMap(order));
+      return docRef.id;
+    } catch (e) {
+      throw Exception('Error creating order: $e');
     }
-    
-    // Buscar pedido por ID
+  }
+  
+  // Buscar pedido por ID
   Future<OrderEntity?> getOrder(String id) async {
     try {
       final doc = await _firestore.collection('pedidos').doc(id).get();
@@ -28,6 +28,20 @@ class OrderRepository {
       return null;
     } catch (e) {
       throw Exception('Erro ao buscar pedido: $e');
+    }
+  }
+
+  // Buscar TODOS os pedidos (sem filtro de data)
+  Future<List<OrderEntity>> getAllOrders() async {
+    try {
+      final snapshot = await _firestore
+          .collection('pedidos')
+          .orderBy('orderDateTime', descending: true)
+          .get();
+
+      return snapshot.docs.map((doc) => _fromMap(doc.data(), doc.id)).toList();
+    } catch (e) {
+      throw Exception('Erro ao buscar todos os pedidos: $e');
     }
   }
 
@@ -57,7 +71,18 @@ class OrderRepository {
             .toList());
   }
 
-    // Stream por intervalo de datas
+  // Stream para TODOS os pedidos (sem filtro de data)
+  Stream<List<OrderEntity>> getAllOrdersStream() {
+    return _firestore
+        .collection('pedidos')
+        .orderBy('orderDateTime', descending: true)
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) => _fromMap(doc.data(), doc.id))
+            .toList());
+  }
+
+  // Stream por intervalo de datas
   Stream<List<OrderEntity>> watchOrdersByDateRange(DateTime start, DateTime end) {
     return _firestore
         .collection('pedidos')
@@ -70,7 +95,7 @@ class OrderRepository {
             .toList());
   }
 
-    // Atualizar pedido
+  // Atualizar pedido
   Future<void> updateOrder(String id, OrderEntity order) async {
     try {
       await _firestore.collection('pedidos').doc(id).update(_toMap(order));
@@ -115,7 +140,7 @@ class OrderRepository {
     );
   }
 
-  // Métodos auxiliares para ProductEntity (você pode mover para ProductRepository depois)
+  // Métodos auxiliares para ProductEntity
   Map<String, dynamic> _productToMap(ProductEntity product) {
     return {
       'id': product.id,
@@ -151,24 +176,26 @@ class OrderRepository {
         return OrderStatus.pending;
     }
   }
-}
 
-// Conversores de paymentMethod
-String _paymentMethodToString(PaymentMethods method) {
-  return method.toString().split('.').last;
-}
+  // Conversores de paymentMethod
+  String _paymentMethodToString(PaymentMethods method) {
+    return method.toString().split('.').last;
+  }
 
-PaymentMethods _paymentMethodFromString(String method) {
-  switch (method) {
-    case 'dinheiro':
-      return PaymentMethods.dinheiro;
-    case 'pix':
-      return PaymentMethods.pix;
-    case 'credito':
-      return PaymentMethods.credito;
-    case 'debito':
-    return PaymentMethods.debito;
-    default:
-      return PaymentMethods.dinheiro; // fallback
+  PaymentMethods _paymentMethodFromString(String method) {
+    switch (method) {
+      case 'dinheiro':
+        return PaymentMethods.dinheiro;
+      case 'pix':
+        return PaymentMethods.pix;
+      case 'credito':
+        return PaymentMethods.credito;
+      case 'debito':
+        return PaymentMethods.debito;
+      case 'fiado':
+        return PaymentMethods.fiado;
+      default:
+        return PaymentMethods.dinheiro;
+    }
   }
 }
