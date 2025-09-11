@@ -3,7 +3,7 @@ import 'orders_screen.dart';
 import 'new_order_screen.dart';
 import 'pending_screen.dart';
 import 'dashboard_screen.dart';
-import 'package:gasbub_flutter/widgets/menu.dart';
+import 'package:gashub_flutter/widgets/menu.dart';
 
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});

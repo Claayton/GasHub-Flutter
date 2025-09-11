@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:gasbub_flutter/repositories/order_repository.dart';
-import 'package:gasbub_flutter/cubit/dashboard/dashboard_state.dart';
-import 'package:gasbub_flutter/models/order_entity.dart';
+import 'package:gashub_flutter/repositories/order_repository.dart';
+import 'package:gashub_flutter/cubit/dashboard/dashboard_state.dart';
+import 'package:gashub_flutter/models/order_entity.dart';
 
 /// Enum para filtro de período
 enum PeriodFilter { hoje, semana, mes }

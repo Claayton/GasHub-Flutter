@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:gasbub_flutter/cubit/orders/orders_cubit.dart';
-import 'package:gasbub_flutter/models/order_entity.dart';
-import 'package:gasbub_flutter/models/product_entity.dart';
-import 'package:gasbub_flutter/screens/main_navigation_screen.dart';
+import 'package:gashub_flutter/cubit/orders/orders_cubit.dart';
+import 'package:gashub_flutter/models/order_entity.dart';
+import 'package:gashub_flutter/models/product_entity.dart';
+import 'package:gashub_flutter/screens/main_navigation_screen.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 

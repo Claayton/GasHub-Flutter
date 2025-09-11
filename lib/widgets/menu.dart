@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:gasbub_flutter/screens/auth/login_screen.dart';
+import 'package:gashub_flutter/screens/auth/login_screen.dart';
 import '../cubit/auth/auth_cubit.dart';
 import '../cubit/auth/auth_state.dart';
 

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:gasbub_flutter/cubit/dashboard/dashboard_cubit.dart';
-import 'package:gasbub_flutter/cubit/dashboard/dashboard_state.dart';
-import 'package:gasbub_flutter/utils/formatters.dart';
-import 'package:gasbub_flutter/models/order_entity.dart';
+import 'package:gashub_flutter/cubit/dashboard/dashboard_cubit.dart';
+import 'package:gashub_flutter/cubit/dashboard/dashboard_state.dart';
+import 'package:gashub_flutter/utils/formatters.dart';
+import 'package:gashub_flutter/models/order_entity.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});

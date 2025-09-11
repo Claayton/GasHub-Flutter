@@ -1,4 +1,4 @@
-package com.example.gasbub_flutter
+package com.example.gashub_flutter
 
 import io.flutter.embedding.android.FlutterActivity
 

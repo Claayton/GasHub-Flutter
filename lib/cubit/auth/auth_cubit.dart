@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:gasbub_flutter/services/auth_service.dart';
+import 'package:gashub_flutter/services/auth_service.dart';
 import 'auth_state.dart'; // 👈 Import do mesmo diretório
 
 class AuthCubit extends Cubit<AuthState> {

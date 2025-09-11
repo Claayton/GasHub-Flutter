@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:gasbub_flutter/models/order_entity.dart';
-import 'package:gasbub_flutter/repositories/order_repository.dart';
-import 'package:gasbub_flutter/cubit/orders/orders_state.dart';
+import 'package:gashub_flutter/models/order_entity.dart';
+import 'package:gashub_flutter/repositories/order_repository.dart';
+import 'package:gashub_flutter/cubit/orders/orders_state.dart';
 
 class OrdersCubit extends Cubit<OrdersState> {
   final OrderRepository _orderRepository;

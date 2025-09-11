@@ -1,7 +1,7 @@
 import 'dart:async'; // 👈 Adicione esta importação
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:gasbub_flutter/models/product_entity.dart';
-import 'package:gasbub_flutter/models/order_entity.dart';
+import 'package:gashub_flutter/models/product_entity.dart';
+import 'package:gashub_flutter/models/order_entity.dart';
 
 class OrderRepository {
   final FirebaseFirestore _firestore;

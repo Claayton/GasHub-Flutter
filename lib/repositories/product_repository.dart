@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:gasbub_flutter/models/product_entity.dart';
+import 'package:gashub_flutter/models/product_entity.dart';
 
 class ProductRepository {
   final FirebaseFirestore _firestore;

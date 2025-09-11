@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gasbub_flutter/cubit/dashboard/dashboard_cubit.dart';
+import 'package:gashub_flutter/cubit/dashboard/dashboard_cubit.dart';
 
 @immutable
 abstract class DashboardState {

@@ -1,5 +1,5 @@
-name: gasbub_flutter
-description: "A new Flutter project."
+name: gashub_flutter
+description: "GasHub é um app para gerenciamento de revenda de gás, permitindo registrar novos pedidos com múltiplas formas de pagamento, acompanhar vendas do dia, gerenciar vendas a receber e visualizar métricas detalhadas em um dashboard."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev

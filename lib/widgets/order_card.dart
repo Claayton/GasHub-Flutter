@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:gasbub_flutter/models/order_entity.dart';
-import 'package:gasbub_flutter/utils/formatters.dart';
+import 'package:gashub_flutter/models/order_entity.dart';
+import 'package:gashub_flutter/utils/formatters.dart';
 
 class OrderCard extends StatelessWidget {
   final OrderEntity order;

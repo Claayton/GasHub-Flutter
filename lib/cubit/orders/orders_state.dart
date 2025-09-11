@@ -1,4 +1,4 @@
-import 'package:gasbub_flutter/models/order_entity.dart';
+import 'package:gashub_flutter/models/order_entity.dart';
 
 abstract class OrdersState {}
 

@@ -1,4 +1,4 @@
-import 'package:gasbub_flutter/models/product_entity.dart';
+import 'package:gashub_flutter/models/product_entity.dart';
 
 enum OrderStatus { pending, confirmed }
 enum PaymentMethods { pix, debito, credito, dinheiro, fiado }

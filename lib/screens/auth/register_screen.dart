@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:gasbub_flutter/cubit/auth/auth_cubit.dart';
-import 'package:gasbub_flutter/cubit/auth/auth_state.dart';
-import 'package:gasbub_flutter/screens/main_navigation_screen.dart';
+import 'package:gashub_flutter/cubit/auth/auth_cubit.dart';
+import 'package:gashub_flutter/cubit/auth/auth_state.dart';
+import 'package:gashub_flutter/screens/main_navigation_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   final VoidCallback onRegistered;

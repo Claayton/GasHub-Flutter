@@ -3,9 +3,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import 'package:gasbub_flutter/services/auth_service.dart';
-import 'package:gasbub_flutter/cubit/auth/auth_cubit.dart';
-import 'package:gasbub_flutter/cubit/auth/auth_state.dart';
+import 'package:gashub_flutter/services/auth_service.dart';
+import 'package:gashub_flutter/cubit/auth/auth_cubit.dart';
+import 'package:gashub_flutter/cubit/auth/auth_state.dart';
 
 // ======== Mocks ========
 class MockAuthService extends Mock implements AuthService {}
