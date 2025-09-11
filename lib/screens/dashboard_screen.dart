@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gasbub_flutter/cubit/dashboard/dashboard_cubit.dart';
+import 'package:gasbub_flutter/cubit/dashboard/dashboard_state.dart';
 import 'package:gasbub_flutter/utils/formatters.dart';
+import 'package:gasbub_flutter/models/order_entity.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -9,41 +13,19 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  String _selectedFilter = 'semana'; // semana, mes, personalizado
+  PeriodFilter _selectedFilter = PeriodFilter.semana;
 
-  // Dados mockados - depois você conecta com seu backend
-  final Map<String, dynamic> _metrics = {
-    'totalPedidos': 42,
-    'totalValor': 5280.0,
-    'totalFiados': 8,
-    'totalPagos': 34,
-    'mediaPedido': 125.71,
-    'taxaConversao': 80.9,
-  };
+  @override
+  void initState() {
+    super.initState();
+    _loadDashboard();
+  }
 
-  final List<Map<String, dynamic>> _recentOrders = [
-    {
-      'id': '1',
-      'customerName': 'Maria Silva',
-      'totalValue': 120.0,
-      'paymentMethod': 'Fiado',
-      'timestamp': DateTime.now().subtract(const Duration(hours: 2)),
-    },
-    {
-      'id': '2', 
-      'customerName': 'João Santos',
-      'totalValue': 180.0,
-      'paymentMethod': 'PIX',
-      'timestamp': DateTime.now().subtract(const Duration(hours: 5)),
-    },
-    {
-      'id': '3',
-      'customerName': 'Ana Costa',
-      'totalValue': 90.0, 
-      'paymentMethod': 'Dinheiro',
-      'timestamp': DateTime.now().subtract(const Duration(days: 1)),
-    },
-  ];
+  void _loadDashboard() {
+    final cubit = context.read<DashboardCubit>();
+    final period = cubit.getPeriodFromFilter(_selectedFilter);
+    cubit.loadDashboardMetrics(period);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,155 +33,171 @@ class _DashboardScreenState extends State<DashboardScreen> {
       backgroundColor: const Color(0xFFf5f7fa),
       body: RefreshIndicator(
         onRefresh: () async {
-          // Implementar refresh dos dados
-          await Future.delayed(const Duration(seconds: 1));
-          setState(() {});
+          _loadDashboard();
         },
-        child: CustomScrollView(
-          slivers: [
-            // Filtros temporais
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.only(top: 30, bottom: 15,left: 16, right: 16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _FilterChip(
-                      label: 'Hoje',
-                      isSelected: _selectedFilter == 'hoje',
-                      onTap: () => setState(() => _selectedFilter = 'hoje'),
-                    ),
-                    const SizedBox(width: 8),
-                    _FilterChip(
-                      label: 'Semana',
-                      isSelected: _selectedFilter == 'semana',
-                      onTap: () => setState(() => _selectedFilter = 'semana'),
-                    ),
-                    const SizedBox(width: 8),
-                    _FilterChip(
-                      label: 'Mês',
-                      isSelected: _selectedFilter == 'mes',
-                      onTap: () => setState(() => _selectedFilter = 'mes'),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+        child: BlocBuilder<DashboardCubit, DashboardState>(
+          builder: (context, state) {
+            DashboardMetrics? metrics;
 
-            // Cards de métricas
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: GridView.count(
-                  crossAxisCount: 2,
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  childAspectRatio: 1.2,
-                  children: [
-                    _MetricCard(
-                      icon: Icons.receipt,
-                      value: _metrics['totalPedidos'].toString(),
-                      label: 'Total Pedidos',
-                      color: const Color(0xFF007bff),
-                    ),
-                    _MetricCard(
-                      icon: Icons.attach_money,
-                      value: 'R\$${formatarValor(_metrics['totalValor'])}',
-                      label: 'Valor Total',
-                      color: const Color(0xFF28a745),
-                    ),
-                    _MetricCard(
-                      icon: Icons.pending_actions,
-                      value: _metrics['totalFiados'].toString(),
-                      label: 'Fiados',
-                      color: const Color(0xFFffc107),
-                    ),
-                    _MetricCard(
-                      icon: Icons.check_circle,
-                      value: _metrics['totalPagos'].toString(),
-                      label: 'Pagos',
-                      color: const Color(0xFF17a2b8),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+            if (state is DashboardLoaded) {
+              metrics = state.metrics;
+            }
 
-            // Métricas secundárias
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _SecondaryMetric(
-                      label: 'Média por Pedido',
-                      value: 'R\$${formatarValor(_metrics['mediaPedido'])}',
+            return CustomScrollView(
+              slivers: [
+                // Filtros temporais
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 30, bottom: 15, left: 16, right: 16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _FilterChip(
+                          label: 'Hoje',
+                          isSelected: _selectedFilter == PeriodFilter.hoje,
+                          onTap: () {
+                            setState(() => _selectedFilter = PeriodFilter.hoje);
+                            _loadDashboard();
+                          },
+                        ),
+                        const SizedBox(width: 8),
+                        _FilterChip(
+                          label: 'Semana',
+                          isSelected: _selectedFilter == PeriodFilter.semana,
+                          onTap: () {
+                            setState(() => _selectedFilter = PeriodFilter.semana);
+                            _loadDashboard();
+                          },
+                        ),
+                        const SizedBox(width: 8),
+                        _FilterChip(
+                          label: 'Mês',
+                          isSelected: _selectedFilter == PeriodFilter.mes,
+                          onTap: () {
+                            setState(() => _selectedFilter = PeriodFilter.mes);
+                            _loadDashboard();
+                          },
+                        ),
+                      ],
                     ),
-                    _SecondaryMetric(
-                      label: 'Taxa de Conversão',
-                      value: '${_metrics['taxaConversao']}%',
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
 
-            // Gráficos placeholder
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '📈 Visualização Gráfica',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey[800],
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Container(
-                      height: 200,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Color.fromRGBO(0, 0, 0, 0.1),
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
+                // Cards de métricas
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: metrics == null
+                        ? const Center(child: CircularProgressIndicator())
+                        : GridView.count(
+                            crossAxisCount: 2,
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            crossAxisSpacing: 12,
+                            mainAxisSpacing: 12,
+                            childAspectRatio: 1.2,
+                            children: [
+                              _MetricCard(
+                                icon: Icons.receipt,
+                                value: metrics.totalPedidos.toString(),
+                                label: 'Total Pedidos',
+                                color: const Color(0xFF007bff),
+                              ),
+                              _MetricCard(
+                                icon: Icons.attach_money,
+                                value: 'R\$${formatarValor(metrics.totalValor)}',
+                                label: 'Valor Total',
+                                color: const Color(0xFF28a745),
+                              ),
+                              _MetricCard(
+                                icon: Icons.pending_actions,
+                                value: metrics.totalFiados.toString(),
+                                label: 'Fiados',
+                                color: const Color(0xFFffc107),
+                              ),
+                              _MetricCard(
+                                icon: Icons.check_circle,
+                                value: metrics.totalPagos.toString(),
+                                label: 'Pagos',
+                                color: const Color(0xFF17a2b8),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                      child: const Center(
-                        child: Text(
-                          'Gráficos serão implementados aqui\n\n📊 Gráfico de vendas\n🥧 Distribuição de pagamentos',
-                          textAlign: TextAlign.center,
+                  ),
+                ),
+
+                // Métricas secundárias
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: metrics == null
+                        ? const SizedBox.shrink()
+                        : Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              _SecondaryMetric(
+                                label: 'Média por Pedido',
+                                value: 'R\$${formatarValor(metrics.mediaPedido)}',
+                              ),
+                              _SecondaryMetric(
+                                label: 'Taxa de Conversão',
+                                value: '${metrics.taxaConversao.toStringAsFixed(1)}%',
+                              ),
+                            ],
+                          ),
+                  ),
+                ),
+
+                // Gráficos placeholder
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '📈 Visualização Gráfica',
                           style: TextStyle(
-                            color: Colors.grey,
-                            fontSize: 14,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey[800],
                           ),
                         ),
-                      ),
+                        const SizedBox(height: 12),
+                        Container(
+                          height: 200,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Color.fromRGBO(0, 0, 0, 0.1),
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: const Center(
+                            child: Text(
+                              'Gráficos serão implementados aqui\n\n📊 Gráfico de vendas\n🥧 Distribuição de pagamentos',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Colors.grey,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
 
-            // Pedidos recentes
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
+                // Pedidos recentes
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Text(
                       '📋 Pedidos Recentes',
                       style: TextStyle(
                         fontSize: 16,
@@ -207,28 +205,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         color: Colors.grey[800],
                       ),
                     ),
-                    const SizedBox(height: 12),
-                  ],
+                  ),
                 ),
-              ),
-            ),
 
-            // Lista de pedidos
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final order = _recentOrders[index];
-                  return _OrderItemCard(order: order);
-                },
-                childCount: _recentOrders.length,
-              ),
-            ),
+                // Lista de pedidos
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      if (metrics == null) return const SizedBox.shrink();
+                      final OrderEntity order = metrics.recentOrders[index];
+                      return _OrderItemCard(order: order);
+                    },
+                    childCount: metrics?.recentOrders.length ?? 0,
+                  ),
+                ),
 
-            // Espaço final
-            const SliverToBoxAdapter(
-              child: SizedBox(height: 20),
-            ),
-          ],
+                // Espaço final
+                const SliverToBoxAdapter(
+                  child: SizedBox(height: 20),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -318,10 +316,7 @@ class _MetricCard extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               label,
-              style: const TextStyle(
-                fontSize: 12,
-                color: Colors.grey,
-              ),
+              style: const TextStyle(fontSize: 12, color: Colors.grey),
               textAlign: TextAlign.center,
             ),
           ],
@@ -336,10 +331,7 @@ class _SecondaryMetric extends StatelessWidget {
   final String label;
   final String value;
 
-  const _SecondaryMetric({
-    required this.label,
-    required this.value,
-  });
+  const _SecondaryMetric({required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
@@ -352,13 +344,7 @@ class _SecondaryMetric extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 12,
-              color: Colors.grey,
-            ),
-          ),
+          Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
           const SizedBox(height: 4),
           Text(
             value,
@@ -376,67 +362,45 @@ class _SecondaryMetric extends StatelessWidget {
 
 // Componente para itens da lista de pedidos
 class _OrderItemCard extends StatelessWidget {
-  final Map<String, dynamic> order;
+  final OrderEntity order;
 
   const _OrderItemCard({required this.order});
 
   @override
   Widget build(BuildContext context) {
+    final isFiado = order.paymentMethod == PaymentMethods.fiado;
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: Color.fromRGBO(0, 0, 0, 0.05),
-            blurRadius: 2,
-            offset: const Offset(0, 1),
-          ),
+        boxShadow: const [
+          BoxShadow(color: Color.fromRGBO(0, 0, 0, 0.05), blurRadius: 2, offset: Offset(0, 1))
         ],
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         leading: CircleAvatar(
-          backgroundColor: order['paymentMethod'] == 'Fiado'
-              ? const Color.fromRGBO(255, 193, 7, 0.2)
-              : const Color.fromRGBO(40, 167, 69, 0.2),
-          child: Icon(
-            order['paymentMethod'] == 'Fiado' 
-                ? Icons.pending_actions 
-                : Icons.check_circle,
-            size: 20,
-            color: order['paymentMethod'] == 'Fiado'
-                ? const Color(0xFFffc107)
-                : const Color(0xFF28a745),
-          ),
+          backgroundColor: isFiado ? const Color.fromRGBO(255, 193, 7, 0.2) : const Color.fromRGBO(40, 167, 69, 0.2),
+          child: Icon(isFiado ? Icons.pending_actions : Icons.check_circle,
+              size: 20, color: isFiado ? const Color(0xFFffc107) : const Color(0xFF28a745)),
         ),
-        title: Text(
-          order['customerName'],
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
+        title: Text(order.customerName, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
         subtitle: Text(
-          'R\$${formatarValor(order['totalValue'])} • ${_formatDate(order['timestamp'])}',
+          'R\$${formatarValor(order.totalValue)} • ${_formatDate(order.orderDateTime)}',
           style: const TextStyle(fontSize: 12),
         ),
         trailing: Text(
-          order['paymentMethod'],
+          isFiado ? 'Fiado' : order.paymentMethod.name,
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: order['paymentMethod'] == 'Fiado'
-                ? const Color(0xFFffc107)
-                : const Color(0xFF28a745),
+            color: isFiado ? const Color(0xFFffc107) : const Color(0xFF28a745),
           ),
         ),
       ),
     );
   }
 
-  String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year}';
-  }
+  String _formatDate(DateTime date) => '${date.day}/${date.month}/${date.year}';
 }

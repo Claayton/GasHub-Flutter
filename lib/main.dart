@@ -4,6 +4,7 @@ import 'services/auth_service.dart';
 import 'cubit/auth/auth_cubit.dart';
 import 'cubit/auth/auth_state.dart';
 import 'cubit/orders/orders_cubit.dart';
+import 'cubit/dashboard/dashboard_cubit.dart'; // ← Import do DashboardCubit
 import 'repositories/order_repository.dart';
 import 'config/firebase_config.dart';
 import 'screens/auth/login_screen.dart';
@@ -15,13 +16,16 @@ void main() async {
   await FirebaseConfig.initialize();
 
   runApp(
-    MultiBlocProvider( // ← MUDE PARA MultiBlocProvider
+    MultiBlocProvider(
       providers: [
         BlocProvider(
           create: (_) => AuthCubit(AuthService()),
         ),
-        BlocProvider( // ← ADICIONE O OrdersCubit
+        BlocProvider(
           create: (_) => OrdersCubit(OrderRepository()),
+        ),
+        BlocProvider(
+          create: (_) => DashboardCubit(OrderRepository()), // ← Adicionado DashboardCubit
         ),
       ],
       child: const GasHubApp(),
