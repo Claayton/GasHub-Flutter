@@ -45,3 +45,9 @@ app.*.map.json
 /android/app/release
 
 run_dev.sh
+run_build_release.sh
+run_build_debug.sh
+android/key.properties
+*.jks
+\n# Keystore files
+upload-keystore.jks
