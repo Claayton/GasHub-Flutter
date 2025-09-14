@@ -19,6 +19,8 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
   final _customerNameController = TextEditingController();
   final _customerAddressController = TextEditingController();
 
+  bool _isSubmitting = false; // controle de loading
+
   // Produtos disponíveis (hardcoded por enquanto)
   final List<ProductEntity> _availableProducts = [
     ProductEntity(
@@ -199,15 +201,24 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
               const SizedBox(height: 24),
 
               ElevatedButton(
-                onPressed: _createOrder,
+                onPressed: _isSubmitting ? null : _createOrder,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF1e40af),
                   minimumSize: const Size.fromHeight(50),
                 ),
-                child: const Text(
-                  'Criar Pedido',
-                  style: TextStyle(fontSize: 18, color: Colors.white),
-                ),
+                child: _isSubmitting
+                    ? const SizedBox(
+                        height: 24,
+                        width: 24,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : const Text(
+                        'Criar Pedido',
+                        style: TextStyle(fontSize: 18, color: Colors.white),
+                      ),
               ),
             ],
           ),
@@ -265,9 +276,8 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context), 
-            child: const Text('Cancelar')
-          ),
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancelar')),
           ElevatedButton(
             onPressed: () {
               final newQuantity = int.tryParse(quantityController.text) ?? quantity;
@@ -312,8 +322,9 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
 
   Future<void> _createOrder() async {
     if (!mounted) return;
-    
+
     if (_formKey.currentState!.validate() && _selectedProducts.isNotEmpty) {
+      setState(() => _isSubmitting = true); // inicia loading
       try {
         final products = _selectedProducts.expand((item) {
           final product = item['product'] as ProductEntity;
@@ -350,19 +361,20 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
 
         await context.read<OrdersCubit>().createOrder(newOrder);
 
-        // Verificar se ainda está montado antes de navegar
         if (!mounted) return;
-        
         final mainState =
             context.findAncestorStateOfType<MainNavigationScreenState>();
         if (mainState != null && mounted) {
           mainState.changeTab(0);
         }
       } catch (e) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao criar pedido: ${e.toString()}')),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Erro ao criar pedido: ${e.toString()}')),
+          );
+        }
+      } finally {
+        if (mounted) setState(() => _isSubmitting = false);
       }
     } else if (_selectedProducts.isEmpty) {
       if (!mounted) return;
