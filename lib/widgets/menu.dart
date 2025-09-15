@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gashub_flutter/screens/auth/login_screen.dart';
+import 'package:gashub_flutter/screens/new_customer_screen.dart'; 
 import '../cubit/auth/auth_cubit.dart';
 import '../cubit/auth/auth_state.dart';
 
@@ -55,11 +56,14 @@ class AppDrawer extends StatelessWidget {
                 ),
               ),
               ListTile(
-                leading: const Icon(Icons.home),
-                title: const Text('Início'),
+                leading: const Icon(Icons.person_add, color: Colors.green),
+                title: const Text('Cadastrar Cliente'),
                 onTap: () {
                   Navigator.pop(context);
-                  Navigator.pushReplacementNamed(context, '/home');
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const NewCustomerScreen()),
+                  );
                 },
               ),
               ListTile(
