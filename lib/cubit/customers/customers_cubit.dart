@@ -1,4 +1,3 @@
-// customer_cubit.dart
 import 'package:bloc/bloc.dart';
 import 'package:gashub_flutter/repositories/customer_repository.dart';
 import 'package:gashub_flutter/models/customer_entity.dart';
@@ -9,12 +8,10 @@ class CustomerCubit extends Cubit<CustomerState> {
 
   CustomerCubit(this._repository) : super(CustomerInitial());
 
-  // Método equivalente ao que você faria num Service no RN
   Future<void> saveCustomer(CustomerEntity customer) async {
     emit(CustomerLoading());
     
     try {
-      // ✅ Validações (lógica de negócio que ficaria no Service)
       if (customer.name.isEmpty) {
         throw Exception('Nome é obrigatório');
       }
@@ -23,7 +20,6 @@ class CustomerCubit extends Cubit<CustomerState> {
         throw Exception('Telefone é obrigatório');
       }
 
-      // ✅ Chama o Repository (como você faria com uma API no RN)
       await _repository.saveCustomer(customer);
       
       emit(CustomerSuccess('Cliente salvo com sucesso!'));
@@ -32,5 +28,22 @@ class CustomerCubit extends Cubit<CustomerState> {
     }
   }
 
-  // Outros métodos que você precisaria...
+  Future<void> loadCustomers() async {
+    emit(CustomerLoading());
+    try {
+      final customers = await _repository.getCustomers();
+      emit(CustomersLoaded(customers));
+    } catch (e) {
+      emit(CustomerError(e.toString()));
+    }
+  }
+
+  Future<void> searchCustomers(String query) async {
+    try {
+      final customers = await _repository.searchCustomersByName(query);
+      emit(CustomersLoaded(customers));
+    } catch (e) {
+      emit(CustomerError(e.toString()));
+    }
+  }
 }
