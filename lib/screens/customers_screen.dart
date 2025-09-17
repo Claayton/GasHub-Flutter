@@ -76,14 +76,24 @@ class _CustomersScreenState extends State<CustomersScreen> {
                     Switch(
                       value: _showCreditOnly,
                       onChanged: (value) => setState(() => _showCreditOnly = value),
-                      thumbColor: const WidgetStatePropertyAll(Color(0xFF10B981)),
-                      // se quiser track sem opacity:
-                      trackColor: const WidgetStatePropertyAll(Color(0xFF10B981)),
+                      thumbColor: WidgetStateProperty.resolveWith((states) {
+                        if (states.contains(WidgetState.selected)) {
+                          return const Color(0xFF10B981); // verde quando ligado
+                        }
+                        return Colors.grey.shade300; // cinza quando desligado
+                      }),
+                      trackColor: WidgetStateProperty.resolveWith((states) {
+                        if (states.contains(WidgetState.selected)) {
+                          return const Color(0xFF10B981).withValues(alpha: 0.5);
+                        }
+                        return Colors.grey.shade400; // cinza claro quando desligado
+                      }),
                     ),
                     const SizedBox(width: 8),
                     const Text('Mostrar só clientes que permitem fiado'),
                   ],
                 )
+
               ],
             ),
           ),
