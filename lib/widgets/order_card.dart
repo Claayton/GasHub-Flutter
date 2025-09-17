@@ -35,7 +35,7 @@ class OrderCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: Color.fromRGBO(0, 0, 0, 0.06),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -47,7 +47,7 @@ class OrderCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
-              color: statusColor.withOpacity(0.08),
+              color: Color.lerp(null, statusColor, 0.08)!,
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(12),
                 topRight: Radius.circular(12),
@@ -259,9 +259,9 @@ class _InfoChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: Color.fromRGBO(0, 0, 0, 0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.2)),
+        border: Border.all(color: Color.fromRGBO(0, 0, 0, 0.2)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
