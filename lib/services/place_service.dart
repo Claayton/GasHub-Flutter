@@ -50,4 +50,17 @@ class PlaceService {
       throw Exception('Erro ao buscar detalhes: ${response.errorMessage}');
     }
   }
+
+  Future<PlacesSearchResponse> searchByText(String address) async {
+    final response = await _places.searchByText(
+      address,
+      language: 'pt',
+    );
+
+    if (response.isOkay) {
+      return response;
+    } else {
+      throw Exception('Erro no searchByText: ${response.errorMessage}');
+    }
+  }
 }

@@ -9,7 +9,8 @@ class Address {
   final String? zipCode;
   final String? complement; // Opcional
   final String? referencePoint; // "Ponto de referência"
-  final String? coordinates;
+  final double? latitude;
+  final double? longitude;
 
   Address({
     required this.street,
@@ -20,7 +21,8 @@ class Address {
     this.zipCode,
     this.complement,
     this.referencePoint,
-    this.coordinates,
+    this.latitude,
+    this.longitude,
   });
 
   Map<String, dynamic> toMap() {
@@ -34,7 +36,8 @@ class Address {
       if (complement != null && complement!.isNotEmpty) 'complement': complement,
       if (referencePoint != null && referencePoint!.isNotEmpty)
         'referencePoint': referencePoint,
-      if (coordinates != null && coordinates!.isNotEmpty) 'coordinates': coordinates,
+      if (latitude != null) 'latitude': latitude,
+      if (longitude != null) 'longitude': longitude,
     };
   }
 
@@ -48,7 +51,8 @@ class Address {
       zipCode: map['zipCode'] ?? '',
       complement: map['complement'],
       referencePoint: map['referencePoint'],
-      coordinates: map['coordinates'],
+      latitude: map['latitude'],
+      longitude: map['longitude'],
     );
   }
 

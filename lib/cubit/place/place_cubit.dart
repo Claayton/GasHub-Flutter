@@ -35,4 +35,21 @@ class PlaceCubit extends Cubit<PlaceState> {
       emit(PlaceError(e.toString()));
     }
   }
+
+  Future<Map<String, double>?> geocodeAddress(String address) async {
+    try {
+      final response = await _placeService.searchByText(address);
+
+      if (response.results.isNotEmpty) {
+        final location = response.results.first.geometry!.location;
+        return {
+          'lat': location.lat,
+          'lng': location.lng,
+        };
+      }
+    } catch (e) {
+      print('Erro no geocoding: $e');
+    }
+    return null;
+  }
 }
