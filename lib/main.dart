@@ -12,6 +12,8 @@ import 'config/firebase_config.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/main_navigation_screen.dart';
 import 'screens/auth/splash_screen.dart';
+import 'cubit/place/place_cubit.dart';
+import 'services/place_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,6 +33,9 @@ void main() async {
         ),
         BlocProvider(
           create: (_) => CustomerCubit(CustomerRepository()),
+        ),
+        BlocProvider(
+          create: (_) => PlaceCubit(PlaceService()),
         ),
       ],
       child: const GasHubApp(),
