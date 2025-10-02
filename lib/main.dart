@@ -4,12 +4,16 @@ import 'services/auth_service.dart';
 import 'cubit/auth/auth_cubit.dart';
 import 'cubit/auth/auth_state.dart';
 import 'cubit/orders/orders_cubit.dart';
-import 'cubit/dashboard/dashboard_cubit.dart'; // ← Import do DashboardCubit
+import 'cubit/dashboard/dashboard_cubit.dart';
+import 'cubit/customers/customers_cubit.dart';
+import '/repositories/customer_repository.dart';
 import 'repositories/order_repository.dart';
 import 'config/firebase_config.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/main_navigation_screen.dart';
 import 'screens/auth/splash_screen.dart';
+import 'cubit/place/place_cubit.dart';
+import 'services/place_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,7 +29,13 @@ void main() async {
           create: (_) => OrdersCubit(OrderRepository()),
         ),
         BlocProvider(
-          create: (_) => DashboardCubit(OrderRepository()), // ← Adicionado DashboardCubit
+          create: (_) => DashboardCubit(OrderRepository()),
+        ),
+        BlocProvider(
+          create: (_) => CustomerCubit(CustomerRepository()),
+        ),
+        BlocProvider(
+          create: (_) => PlaceCubit(PlaceService()),
         ),
       ],
       child: const GasHubApp(),

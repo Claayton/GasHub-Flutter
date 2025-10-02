@@ -44,6 +44,9 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0.0"
+
+        // 🔑 Adiciona suporte ao placeholder da chave do Google Maps
+        manifestPlaceholders["GOOGLE_MAPS_API_KEY"] = System.getenv("GOOGLE_MAPS_API_KEY") ?: ""
     }
 
     buildTypes {
