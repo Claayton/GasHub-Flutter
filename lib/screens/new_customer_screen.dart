@@ -42,6 +42,9 @@ class _NewCustomerScreenState extends State<NewCustomerScreen> {
   bool _allowsCredit = false;
   bool? _hasHisOwnHouse;
 
+  double? _savedLatitude;
+  double? _savedLongitude;
+
   @override
   void initState() {
     super.initState();
@@ -363,37 +366,80 @@ class _NewCustomerScreenState extends State<NewCustomerScreen> {
     );
   }
 
+  // Geocodificar endereço quando o usuário digitar manualmente
+  Future<void> _geocodeAddress() async {
+    if (_streetController.text.isEmpty || 
+        _numberController.text.isEmpty || 
+        _cityController.text.isEmpty || 
+        _stateController.text.isEmpty) {
+      return;
+    }
+
+    try {
+      final fullAddress = '${_streetController.text} ${_numberController.text}, '
+          '${_neighborhoodController.text}, '
+          '${_cityController.text}, ${_stateController.text}, Brasil';
+
+      context.read<PlaceCubit>().geocodeAddress(fullAddress).then((coordinates) {
+        if (coordinates != null) {
+          setState(() {
+            _savedLatitude = coordinates['lat'];
+            _savedLongitude = coordinates['lng'];
+          });
+        }
+      });
+    } catch (e) {
+      print('Erro no geocoding: $e');
+    }
+  }
+
   void _saveCustomer() {
     if (_formKey.currentState!.validate()) {
       setState(() => _isSubmitting = true);
 
-      final customer = CustomerEntity(
-        id: null,
-        name: _nameController.text,
-        phone: _phoneController.text,
-        address: Address(
-          street: _streetController.text,
-          number: _numberController.text,
-          neighborhood: _neighborhoodController.text,
-          city: _cityController.text,
-          state: _stateController.text,
-          zipCode: _zipCodeController.text.isNotEmpty ? _zipCodeController.text : null,
-          complement: _complementController.text.isNotEmpty ? _complementController.text : null,
-          referencePoint: _referencePointController.text.isNotEmpty ? _referencePointController.text : null,
-        ),
-        cpf: _cpfController.text.isNotEmpty ? _cpfController.text : null,
-        hasHisOwnHouse: _hasHisOwnHouse,
-        allowsCredit: _allowsCredit,
-        registrationDate: DateTime.now(),
-      );
-
-      context.read<CustomerCubit>().saveCustomer(customer);
+      // Sempre tenta geocodificar antes de salvar
+      _geocodeAddress().then((_) {
+        _saveCustomerWithCoordinates();
+      });
     }
+  }
+
+  void _saveCustomerWithCoordinates() {
+    final customer = CustomerEntity(
+      id: null,
+      name: _nameController.text,
+      phone: _phoneController.text,
+      address: Address(
+        street: _streetController.text,
+        number: _numberController.text,
+        neighborhood: _neighborhoodController.text,
+        city: _cityController.text,
+        state: _stateController.text,
+        zipCode: _zipCodeController.text.isNotEmpty ? _zipCodeController.text : null,
+        complement: _complementController.text.isNotEmpty ? _complementController.text : null,
+        referencePoint: _referencePointController.text.isNotEmpty ? _referencePointController.text : null,
+        latitude: _savedLatitude,    // Pode ser null se geocoding falhar
+        longitude: _savedLongitude,  // Pode ser null se geocoding falhar
+      ),
+      cpf: _cpfController.text.isNotEmpty ? _cpfController.text : null,
+      hasHisOwnHouse: _hasHisOwnHouse,
+      allowsCredit: _allowsCredit,
+      registrationDate: DateTime.now(),
+    );
+
+    context.read<CustomerCubit>().saveCustomer(customer);
   }
 
   void _fillAddressFromPlaceDetails(PlaceDetails details) {
     try {
       final addressComponents = details.addressComponents;
+      final geometry = details.geometry;
+
+      if (geometry != null) {
+        final location = geometry.location;
+         _savedLatitude = location.lat;
+        _savedLongitude = location.lng;
+      }
 
       // Função auxiliar para extrair componentes
       String extractComponent(String type) {
